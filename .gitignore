@@ -1,6 +1,16 @@
+node_modules
+dist
+.tmp
+.sass-cache
+bower_components
+test/bower_components
+.c9/
+.editorconfig
+.gitattributes
+.jshintrc
+.yo-rc.json
+composer.lock
 composer.phar
+rabbitmq-signing-key-public.asc
 vendor/
 
-# Commit your application's lock file http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file
-# You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
-# composer.lock
