@@ -7,25 +7,52 @@ use Monolog\Handler\StreamHandler;
 
 class SimpleReceiver
 {
+    private $pizzaLog;
+    
     private $log;
     
     public function __construct()
     {
-        $this->log = new Logger('pizzas');
-        $this->log->pushHandler(new StreamHandler('logs/pizza.log', Logger::INFO));
+        $this->pizzaLog = new Logger('pizzas');
+        $this->pizzaLog->pushHandler(new StreamHandler('logs/pizza.log', Logger::INFO));
+        
+        $this->log = new Logger('simpleReceive');
+        $this->log->pushHandler(new StreamHandler('logs/simpleReceive.log', Logger::INFO));
     }
     
     public function listen() 
     {
-        $connection = new AMQPConnection('localhost', 5672, 'guest', 'guest');
+        
+        $this->log->addInfo('Start listening routine');
+        
+        $connection = new AMQPConnection(
+            'localhost',    #host 
+            5672,           #port
+            'guest',        #user
+            'guest'         #password
+            );
         $channel = $connection->channel();
         
         
-        $channel->queue_declare('pizzaTime', false, false, false, false);
+        $channel->queue_declare(
+            'pizzaTime',    #queue name, the same as the sender
+            false,          #passive
+            false,          #durable
+            false,          #exclusive
+            false           #autodelete
+            );
         
-        $callback = $this->getClosure();
-        
-        $channel->basic_consume('pizzaTime', '', false, true, false, false, $callback);
+        $channel->basic_consume(
+            'pizzaTime',            #queue 
+            '',                     #consumer tag
+            false,                  #no local
+            true,                   #no ack
+            false,                  #exclusive
+            false,                  #no wait
+            array($this, 'addLog')  #callback
+            );
+            
+        $this->log->addInfo('Consumig from channel');
         
         while(count($channel->callbacks)) {
             $channel->wait();
@@ -35,14 +62,9 @@ class SimpleReceiver
         $connection->close();
     }
     
-    public function getClosure()
+    public function addLog($msg) 
     {
-        $log = $this->log;
-        
-        return function($msg) use ($log) {
-            echo " [x] Received ", $msg->body, "\n";
-            
-            $log->addInfo($msg->body);
-        };
+        $this->log->addInfo('Received ' . $msg->body);
+        $this->pizzaLog->addInfo($msg->body);
     }
 }
