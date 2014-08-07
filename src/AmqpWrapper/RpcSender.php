@@ -8,17 +8,32 @@ use Monolog\Handler\StreamHandler;
 
 class RpcSender
 {
-	private $response;
-	private $corr_id;
-	private $log;
+    /**
+     * @var string
+     */
+    private $response;
+
+    /**
+     * @var string
+     */
+    private $corr_id;
+
+    /**
+     * @var Logger
+     */
+    private $log;
     
     public function __construct()
     {
         $this->log = new Logger('rpcSend');
         $this->log->pushHandler(new StreamHandler('logs/rpcSend.log', Logger::INFO));
     }
-	
-    public function execute($credentials) 
+
+    /**
+     * @param array $credentials
+     * @return string
+     */
+    public function execute($credentials)
     {
     	#In real life apps, never log credentials details
     	$this->log->addInfo('Recevied the credentials: ' . serialize($credentials));  
@@ -92,11 +107,13 @@ class RpcSender
 		
 		return $this->response;
     }
-    
+
     /**
-     * When a message appears, it checks the correlation_id property. If it 
-     * matches the value from the request it returns the response to the 
+     * When a message appears, it checks the correlation_id property. If it
+     * matches the value from the request it returns the response to the
      * application.
+     *
+     * @param AMQPMessage $rep
      */
     public function onResponse(AMQPMessage $rep) {
     	$this->log->addInfo('Received response');

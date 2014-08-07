@@ -7,8 +7,14 @@ use Monolog\Handler\StreamHandler;
 
 class SimpleReceiver
 {
+    /**
+     * @var Logger
+     */
     private $pizzaLog;
-    
+
+    /**
+     * @var Logger
+     */
     private $log;
     
     public function __construct()
@@ -19,8 +25,11 @@ class SimpleReceiver
         $this->log = new Logger('simpleReceive');
         $this->log->pushHandler(new StreamHandler('logs/simpleReceive.log', Logger::INFO));
     }
-    
-    public function listen() 
+
+    /**
+     * Listens for incoming messages
+     */
+    public function listen()
     {
         
         $this->log->addInfo('Start listening routine');
@@ -52,7 +61,7 @@ class SimpleReceiver
             array($this, 'addLog')  #callback
             );
             
-        $this->log->addInfo('Consumig from channel');
+        $this->log->addInfo('Consuming from channel');
         
         while(count($channel->callbacks)) {
             $channel->wait();
@@ -61,8 +70,11 @@ class SimpleReceiver
         $channel->close();
         $connection->close();
     }
-    
-    public function addLog($msg) 
+
+    /**
+     * @param $msg
+     */
+    public function addLog($msg)
     {
         $this->log->addInfo('Received ' . $msg->body);
         $this->pizzaLog->addInfo($msg->body);

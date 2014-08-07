@@ -8,6 +8,9 @@ use Monolog\Handler\StreamHandler;
 
 class RpcReceiver
 {
+    /**
+     * @var Logger
+     */
     private $log;
     
     public function __construct()
@@ -15,8 +18,11 @@ class RpcReceiver
         $this->log = new Logger('rpcReceive');
         $this->log->pushHandler(new StreamHandler('logs/rpcReceive.log', Logger::INFO));
     }
-    
-    public function listen() 
+
+    /**
+     * Listens for incoming messages
+     */
+    public function listen()
     {
         $this->log->addInfo('Begin listen routine');
         
@@ -57,7 +63,12 @@ class RpcReceiver
         $channel->close();
         $connection->close();
     }
-    
+
+    /**
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
+     */
     public function callback(AMQPMessage $req) {
         
         $this->log->addInfo('Received message: ' . $req->body);
@@ -96,7 +107,11 @@ class RpcReceiver
     	    
     	$this->log->addInfo('Acknowledged message to delivery tag: ' . $req->delivery_info['delivery_tag']);
     }
-    
+
+    /**
+     * @param \stdClass $credentials
+     * @return bool
+     */
     private function auth(\stdClass $credentials) {
     	if (($credentials->username == 'admin') && ($credentials->password == 'admin')) {
     	    return true;

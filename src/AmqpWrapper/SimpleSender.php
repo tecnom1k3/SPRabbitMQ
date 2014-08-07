@@ -8,6 +8,9 @@ use Monolog\Handler\StreamHandler;
 
 class SimpleSender
 {
+    /**
+     * @var Logger
+     */
     private $log;
     
     public function __construct()
@@ -32,8 +35,9 @@ class SimpleSender
             'guest',        #user
             'guest'         #password
             );
-        
-        /* @var AMQPChannel $channel */
+
+
+        /** @var $channel AMQPChannel */
         $channel = $connection->channel();
         
         $channel->queue_declare(
