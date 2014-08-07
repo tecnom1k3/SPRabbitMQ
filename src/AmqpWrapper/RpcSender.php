@@ -27,6 +27,7 @@ class RpcSender
 		$channel = $connection->channel();
 		
 		/*
+		 * creates an anonymous exclusive callback queue
 		 * $callback_queue has a value like amq.gen-_U0kJVm8helFzQk9P0z9gg
 		 */
 		list($callback_queue, ,) = $channel->queue_declare(
@@ -59,11 +60,20 @@ class RpcSender
 		
 		$jsonCredentials = json_encode($credentials);
 
+
+		/*
+		 * create a message with two properties: reply_to, which is set to the 
+		 * callback queue and correlation_id, which is set to a unique value for 
+		 * every request
+		 */
 		$msg = new AMQPMessage(
 			$jsonCredentials, 															#body
 			array('correlation_id' => $this->corr_id, 'reply_to' => $callback_queue)	#properties
 			);
 		    
+		/*
+		 * The request is sent to an rpc_queue queue.
+		 */
 		$channel->basic_publish(
 			$msg,		#message 
 			'', 		#exchange
@@ -83,6 +93,11 @@ class RpcSender
 		return $this->response;
     }
     
+    /**
+     * When a message appears, it checks the correlation_id property. If it 
+     * matches the value from the request it returns the response to the 
+     * application.
+     */
     public function onResponse(AMQPMessage $rep) {
     	$this->log->addInfo('Received response');
     	

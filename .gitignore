@@ -13,4 +13,4 @@ composer.lock
 composer.phar
 rabbitmq-signing-key-public.asc
 vendor/
-
+tmp/
