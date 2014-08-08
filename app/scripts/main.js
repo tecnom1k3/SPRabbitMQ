@@ -6,4 +6,11 @@ $(function(){
             alert(result.status);
         });
     });
+    
+    $("#btnInvoiceGenerate").click(function(e) {
+        e.preventDefault();
+        $.post('generateInvoice.php', $("#frmInvoice").serialize(), function(data) {
+            alert('Invoice Generated');
+        })
+    });
 });
